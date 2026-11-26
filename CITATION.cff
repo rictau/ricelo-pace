@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use the Ricelo-Pace model, calculator, or benchmark code in your research, please cite it using these metadata."
+type: software
+title: "Ricelo-Pace: A Mileage-Adjusted, Path-Consistent Power Law for Recreational Race-Time Prediction"
+authors:
+  - family-names: "Taufik"
+    given-names: "Ricki"
+    orcid: "https://orcid.org/0009-0005-4725-4168"
+    email: "rickitaufik@gmail.com"
+repository-code: "https://github.com/rictau/ricelo-pace"
+url: "https://rictau.github.io/ricelo-pace/"
+license: MIT
+version: "1.0.0"
+date-released: "2026-11-25"
+keywords:
+  - recreational running
+  - marathon prediction
+  - half marathon
+  - Riegel power law
+  - training volume
+  - durability
+  - path consistency
+  - GPS telemetry
+  - zero-shot transfer

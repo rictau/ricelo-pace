@@ -1,0 +1,20 @@
+{
+  "name": "ricelo-pace",
+  "version": "1.0.0",
+  "description": "Ricelo-Pace multi-distance road-race finish-time formula, interactive web calculator, and zero-dependency benchmark suite.",
+  "license": "MIT",
+  "author": "Ricki Taufik <rickitaufik@gmail.com>",
+  "homepage": "https://rictau.github.io/ricelo-pace/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rictau/ricelo-pace.git"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "test": "node --test tests/reproduceUsBenchmark.test.js",
+    "figures": "node scripts/generatePaperFigures.js",
+    "reproduce": "node scripts/reproduceUsBenchmark.js"
+  }
+}

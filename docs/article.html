@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <title>Why Marathon Calculators Predict Too Fast, and How Ricelo-Pace Fixes Them</title>
+  <meta name="description" content="How weekly running mileage changes road-race finish times from 5K to the marathon, built from 2,303 US runners and tested on real GPS watch logs.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="page-shell article-shell">
+    <header class="site-header">
+      <div class="brand-block">
+        <a href="./" class="brand-home"><strong>Ricelo-Pace</strong></a>
+        <span class="subtitle">Article</span>
+      </div>
+      <nav class="header-links" aria-label="Project links">
+        <a href="./">Calculator</a>
+        <a href="https://github.com/rictau/ricelo-pace">GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <article class="article-prose">
+        <header class="article-header">
+          <h1 class="article-title">Why Marathon Calculators Predict Too Fast, and How Ricelo-Pace Fixes Them</h1>
+          <p class="article-deck">
+            Built from 2,303 US survey runners and tested on real GPS watch training logs from 5K to the marathon.
+          </p>
+          <p class="article-byline">By Ricki Taufik &middot; November 2026</p>
+        </header>
+
+        <h2>Why Race Calculators Set Your Marathon Goal Too Fast</h2>
+        <p>
+          Run a 2:00:00 Half Marathon, plug it into almost any online race calculator, and it will give you a marathon goal of <strong>4:07 to 4:10</strong>.
+        </p>
+        <p>
+          Most calculators still use Pete Riegel's 1977 formula <math><mrow><mo>(</mo><msub><mi>T</mi><mn>2</mn></msub><mo>=</mo><msub><mi>T</mi><mn>1</mn></msub><msup><mrow><mo>(</mo><msub><mi>D</mi><mn>2</mn></msub><mo>/</mo><msub><mi>D</mi><mn>1</mn></msub><mo>)</mo></mrow><mn>1.06</mn></msup><mo>)</mo></mrow></math> or tables with a similar curve. That 1.06 exponent works well if you run 180+ km per week like an elite marathoner.
+        </p>
+        <p>
+          Most recreational marathoners run 35 to 65 km per week. Across 1,022 US recreational marathons, Riegel 1.06 predicts finish times <strong>13 to 15 minutes too fast</strong> on average and misses by 10 minutes or more for over half of runners.
+        </p>
+
+        <h2>Weekly Mileage: The Missing Input</h2>
+        <p>
+          In 2016, Andrew Vickers and Emily Vertosick studied <strong>2,303 recreational runners</strong> and showed that adding weekly mileage beside a shorter race time cut average marathon error from 16.1 minutes down to 11.2 minutes.
+        </p>
+        <p>
+          Their model was a big improvement, but testing it across all paces, distances, and real GPS watch logs from 162 members of an Indonesian running club showed three practical limits:
+        </p>
+        <ol>
+          <li><strong>Impossible paces at high mileage:</strong> Because it adds mileage with a straight-line speed formula, high mileage can overpower slower race pace. In the US dataset, it predicted <strong>faster than elite Riegel 1.06</strong> for 19 runners, and even <strong>faster per kilometer in the marathon than in their shorter race</strong> for four runners.</li>
+          <li><strong>Too slow for fast runners:</strong> That same flat speed slope predicts sub-3:15 marathoners nearly 3 minutes too slow.</li>
+          <li><strong>Marathon only, one-way only:</strong> It gives no mileage adjustment for Half Marathons or 10Ks, and cannot predict a Half Marathon from a recent marathon.</li>
+        </ol>
+
+        <h2>How Ricelo-Pace Works</h2>
+        <p>
+          <strong>Ricelo-Pace</strong> keeps Riegel's simple formula and only changes the exponent (try it in the <a href="./">live calculator</a>). You need one recent race <math><mo>(</mo><msub><mi>D</mi><mn>1</mn></msub><mo>,</mo><msub><mi>T</mi><mn>1</mn></msub><mo>)</mo></math> and your weekly running mileage <math><mi>V</mi></math> in km/week (multiply miles/week by 1.609):
+        </p>
+
+        <div class="article-math">
+          <math display="block">
+            <msub><mover><mi>T</mi><mo>^</mo></mover><mn>2</mn></msub>
+            <mo>=</mo>
+            <msub><mi>T</mi><mn>1</mn></msub>
+            <msup>
+              <mrow>
+                <mo>(</mo>
+                <mfrac><msub><mi>D</mi><mn>2</mn></msub><msub><mi>D</mi><mn>1</mn></msub></mfrac>
+                <mo>)</mo>
+              </mrow>
+              <mover><mi>x</mi><mo>^</mo></mover>
+            </msup>
+            <mo>,</mo>
+            <mspace width="1.2em"/>
+            <mover><mi>x</mi><mo>^</mo></mover>
+            <mo>=</mo>
+            <mn>1.06</mn>
+            <mo>+</mo>
+            <mi>w</mi>
+            <mo>&sdot;</mo>
+            <mi>max</mi>
+            <mrow>
+              <mo>(</mo>
+              <mn>0</mn><mo>,</mo><mspace width="0.25em"/>
+              <mn>0.5413</mn><mo>&minus;</mo><mn>0.1002</mn><mspace width="0.15em"/><mi>ln</mi><mo>(</mo><mi>max</mi><mo>(</mo><mn>10</mn><mo>,</mo><mi>V</mi><mo>)</mo><mo>)</mo>
+              <mo>)</mo>
+            </mrow>
+          </math>
+        </div>
+
+        <p>
+          Here <math><mi>w</mi></math> is a fixed weight for each race pair: <strong>0.624</strong> for HM &harr; FM, <strong>0.380</strong> for 10K &harr; FM, <strong>0.260</strong> for 5K &harr; FM, <strong>0.154</strong> for 10K &harr; HM, <strong>0.085</strong> for 5K &harr; HM, and <strong>0.011</strong> for 5K &harr; 10K.
+        </p>
+        <h3>Half to Full Marathon in One Line</h3>
+        <p>
+          For <strong>Half Marathon to Full Marathon</strong> (<math><msub><mi>D</mi><mn>2</mn></msub><mo>/</mo><msub><mi>D</mi><mn>1</mn></msub><mo>=</mo><mn>2</mn></math>), multiplying <math><mi>w</mi><mo>=</mo><mn>0.6239</mn></math> in ahead of time gives a <strong>one-line shortcut</strong>:
+        </p>
+
+        <div class="article-math">
+          <math display="block">
+            <mover><mi>x</mi><mo>^</mo></mover>
+            <mo>=</mo>
+            <mn>1.06</mn>
+            <mo>+</mo>
+            <mi>max</mi>
+            <mrow>
+              <mo>(</mo>
+              <mn>0</mn><mo>,</mo><mspace width="0.25em"/>
+              <mn>0.3377</mn><mo>&minus;</mo><mn>0.0625</mn><mspace width="0.15em"/><mi>ln</mi><mo>(</mo><mi>max</mi><mo>(</mo><mn>10</mn><mo>,</mo><mi>V</mi><mo>)</mo><mo>)</mo>
+              <mo>)</mo>
+            </mrow>
+            <mo>,</mo>
+            <mspace width="1.1em"/>
+            <msub><mover><mi>T</mi><mo>^</mo></mover><mtext>FM</mtext></msub>
+            <mo>=</mo>
+            <msub><mi>T</mi><mtext>HM</mtext></msub>
+            <mo>&sdot;</mo>
+            <msup><mn>2</mn><mover><mi>x</mi><mo>^</mo></mover></msup>
+          </math>
+        </div>
+
+        <p>
+          <em>Example: a 2:00:00 Half Marathon (120 min) at 50 km/week gives <math><mover><mi>x</mi><mo>^</mo></mover><mo>=</mo><mn>1.1532</mn></math> and <math><mn>120</mn><mo>&times;</mo><msup><mn>2</mn><mn>1.1532</mn></msup></math> = <strong>4:26:53</strong>. In Excel or Google Sheets: <code>=A2 * 2^(1.06 + MAX(0, 0.3377 - 0.0625 * LN(MAX(10, B2))))</code>.</em>
+        </p>
+
+        <h3>What the Formula Handles for You</h3>
+        <ul>
+          <li><strong>Never faster than Riegel 1.06:</strong> High mileage brings your exponent down toward 1.06, never past it.</li>
+          <li><strong>Biggest gains at moderate mileage:</strong> Moving from 25 to 50 km/week cuts far more marathon fade than moving from 100 to 125 km/week.</li>
+          <li><strong>Same answer in both directions:</strong> Converting Half to Full and Full back to Half match exactly, and chaining 5K &rarr; Half &rarr; Full gives the exact same second as 5K &rarr; Full.</li>
+          <li><strong>Works across all distances:</strong> Short efforts (15-min Balke test, 5K, 10K) stay close to 1.06, while mileage matters much more from the Half Marathon up.</li>
+        </ul>
+
+        <figure class="article-figure">
+          <img
+            src="./figures/fig1-exponent-curves.svg"
+            alt="Ricelo-Pace fatigue exponents across weekly running mileage from 10 to 160 km/week"
+            width="920"
+            height="495">
+        </figure>
+
+        <h2>How Accurate Is It? Tests on Real Runners</h2>
+        <ul>
+          <li><strong>US marathoners:</strong> Tested on unseen runners in Vickers &amp; Vertosick's dataset, Ricelo-Pace cut average marathon error by <strong>5.1 minutes</strong> vs. Riegel 1.06 (11.1 vs. 16.1 min), matched V&amp;V on course-adjusted marathons, and had fewer risky fast misses on raw marathon times.</li>
+          <li><strong>US Half Marathons &amp; reverse predictions:</strong> Across 1,316 Half Marathons, Ricelo-Pace beat both Riegel 1.06 and 1.07. Predicting Half Marathons downward from a recent marathon (717 runners), Riegel 1.06 ran 6.5 minutes too slow on average; Ricelo-Pace cut total error from 7.8 down to <strong>5.0 minutes</strong>.</li>
+          <li><strong>Club GPS watch logs:</strong> We then tested the US formula untouched on two years of Indonesian club races in warm, humid weather, keeping every finish (including bad race-day blow-ups). The table shows the average miss in minutes (<strong>MAE</strong>) and <strong>Penalized MSE</strong>, a score that counts too-fast predictions twice as heavily as too-slow ones, because starting too fast causes the worst late-race slowdowns. Lower is better for both:</li>
+        </ul>
+
+        <div tabindex="0" role="region" aria-label="Club GPS marathon comparison" class="article-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Club GPS Marathon Group</th>
+                <th scope="col">Riegel 1.06</th>
+                <th scope="col">V&amp;V (2016)</th>
+                <th scope="col">Ricelo-Pace</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Race-tagged marathons (N = 22, all finishes)</th>
+                <td>33.9m MAE / 6405 PenMSE</td>
+                <td><strong>28.8m</strong> / 4979</td>
+                <td>28.9m / <strong>4522</strong> (-9% PenMSE)</td>
+              </tr>
+              <tr>
+                <th scope="row">All 42.2 km finishes (N = 37)</th>
+                <td>47.7m MAE / 9259 PenMSE</td>
+                <td>41.0m / 7073</td>
+                <td><strong>37.2m / 5825</strong> (-18% PenMSE)</td>
+              </tr>
+              <tr>
+                <th scope="row">Well-paced marathons without blow-ups (N = 21)</th>
+                <td>22.3m MAE / 1644 PenMSE</td>
+                <td>17.8m / 1066</td>
+                <td><strong>14.8m / 553</strong> (-48% PenMSE)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <figure class="article-figure">
+          <img
+            src="./figures/fig3-cross-continental-penmse.svg"
+            alt="Pacing safety (Penalized MSE) across US validation marathons and club GPS logs"
+            width="900"
+            height="610"
+            loading="lazy">
+        </figure>
+
+        <h2>Race-Day Chart: Finish Times by Weekly Mileage</h2>
+        <p>
+          Find your weekly mileage in the left column to see your predicted finish time from a <strong>2:00:00 Half Marathon</strong> (5:41/km) or a <strong>1:00:00 10K</strong> (6:00/km). The time in parentheses is how much slower that is than the standard 1.06 calculator:
+        </p>
+
+        <div tabindex="0" role="region" aria-label="Race-day finish-time predictions by weekly mileage" class="article-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Weekly Mileage</th>
+                <th scope="col">2:00:00 HM &rarr; FM (R1.06 = 4:10:12)</th>
+                <th scope="col">FM Exp.</th>
+                <th scope="col">1:00:00 10K &rarr; HM (R1.06 = 2:12:23)</th>
+                <th scope="col">HM Exp.</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">20 km/week</th><td><strong>4:37:41</strong> (+27:29)</td><td>1.210</td><td><strong>2:16:07</strong> (+3:44)</td><td>1.097</td></tr>
+              <tr><th scope="row">30 km/week</th><td><strong>4:32:51</strong> (+22:39)</td><td>1.185</td><td><strong>2:15:29</strong> (+3:06)</td><td>1.091</td></tr>
+              <tr><th scope="row">40 km/week</th><td><strong>4:29:28</strong> (+19:16)</td><td>1.167</td><td><strong>2:15:02</strong> (+2:39)</td><td>1.086</td></tr>
+              <tr><th scope="row">50 km/week</th><td><strong>4:26:53</strong> (+16:41)</td><td>1.153</td><td><strong>2:14:41</strong> (+2:18)</td><td>1.083</td></tr>
+              <tr><th scope="row">65 km/week</th><td><strong>4:23:52</strong> (+13:40)</td><td>1.137</td><td><strong>2:14:16</strong> (+1:53)</td><td>1.079</td></tr>
+              <tr><th scope="row">80 km/week</th><td><strong>4:21:30</strong> (+11:18)</td><td>1.124</td><td><strong>2:13:57</strong> (+1:34)</td><td>1.076</td></tr>
+              <tr><th scope="row">100 km/week</th><td><strong>4:18:59</strong> (+8:47)</td><td>1.110</td><td><strong>2:13:36</strong> (+1:13)</td><td>1.072</td></tr>
+              <tr><th scope="row">130 km/week</th><td><strong>4:16:05</strong> (+5:53)</td><td>1.093</td><td><strong>2:13:11</strong> (+0:48)</td><td>1.068</td></tr>
+              <tr><th scope="row">160 km/week</th><td><strong>4:13:52</strong> (+3:40)</td><td>1.080</td><td><strong>2:12:53</strong> (+0:30)</td><td>1.065</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <figure class="article-figure">
+          <img
+            src="./figures/fig7-practical-pacing-impact.svg"
+            alt="Marathon finish-time predictions across weekly mileage for a 2:00:00 Half Marathon runner"
+            width="900"
+            height="440"
+            loading="lazy">
+        </figure>
+
+        <h2>Takeaways for Runners and Coaches</h2>
+        <ol class="article-takeaways">
+          <li>
+            <strong>Set your marathon goal from your mileage, not just your Half time.</strong>
+            A 2:00 Half Marathoner running 40 km/week should plan for about 4:29 (6:23/km), not the 4:10 (5:56/km) most calculators show. That is almost 30 seconds per km too fast, which is often enough to bring on a hard slowdown in the last 10 km.
+          </li>
+          <li>
+            <strong>Enter your weekly mileage from before the taper.</strong>
+            A good number is the average of your six biggest weeks in the 10 weeks before race day. An 8-week watch average taken in race week includes the taper and reads about 18% low (47 vs. 57.5 km/week in the club logs). Use the lower watch number for a safer goal in a first marathon, heat, or hills, and the pre-taper number for a well-tapered goal race in good conditions. For a Half Marathon, the taper barely changes the result.
+          </li>
+          <li>
+            <strong>Extra mileage matters most at the low end.</strong>
+            Runners with more weekly mileage held their pace better over the marathon, and the difference was biggest below about 65 km/week. With the same 2:00 Half, going from 30 to 65 km/week lowers the predicted marathon by about 9 minutes (4:32:51 to 4:23:52). Going from 100 to 130 km/week saves less than 3 minutes.
+          </li>
+          <li>
+            <strong>After a marathon, aim faster in shorter races.</strong>
+            Starting from a recent marathon, the standard calculator set Half Marathon times 6.5 minutes too slow on average, because it reads late-race fade as a lack of speed. Ricelo-Pace works in both directions, so enter your marathon and weekly mileage to set Half, 10K, or 5K goals.
+          </li>
+          <li>
+            <strong>Use short, hard tests to check speed.</strong>
+            Between 5K and 10K, weekly mileage barely changes the prediction, so a 5K time trial or a 15-minute Balke test is a simple fitness check during a training block. Run it as a real effort: easy training runs make poor inputs and threw off several Half Marathon predictions in the club data. For a marathon goal, a recent Half Marathon is still the best input, because a shorter jump in distance leaves less room for error.
+          </li>
+          <li>
+            <strong>Treat the result as a starting pace, not a promise.</strong>
+            Even with mileage included, US marathon predictions missed by about 11 minutes on average. Start at the predicted pace and save any push for the last 10 km.
+          </li>
+        </ol>
+
+        <p>
+          Riegel's formula has lasted because it needs only one race time. Ricelo-Pace keeps that and adds one number every runner already knows: weekly mileage.
+        </p>
+
+        <div class="article-cta">
+          <p>Try your own race time or inspect the benchmark code:</p>
+          <div class="article-cta-links">
+            <a href="./" class="cta-btn is-primary">Open Race Calculator</a>
+            <!-- Replace with SportRxiv / preprint link once posted -->
+            <span class="cta-btn is-placeholder" aria-disabled="true">Technical Paper (Preprint Forthcoming)</span>
+          </div>
+        </div>
+      </article>
+    </main>
+
+    <footer class="site-footer">
+      Ricki Taufik &middot; MIT License &middot;
+      <a href="https://github.com/rictau/ricelo-pace">github.com/rictau/ricelo-pace</a>
+    </footer>
+  </div>
+</body>
+</html>

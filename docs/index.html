@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <title>Ricelo-Pace | Race Time Calculator</title>
+  <meta name="description" content="Predict 5K, 10K, Half Marathon, and Full Marathon finish times from a recent race or 15-minute Balke test and weekly running mileage.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <div class="brand-block">
+        <h1>Ricelo-Pace</h1>
+        <p class="subtitle">Mileage-adjusted road-race predictor</p>
+      </div>
+      <nav class="header-links" aria-label="Project links">
+        <a href="#pocket-formula" id="formula-nav-link">Formula</a>
+        <a href="./article.html">Article</a>
+        <a href="https://github.com/rictau/ricelo-pace">GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="calc-layout">
+        <section class="panel inputs-panel" aria-labelledby="inputs-heading">
+          <h2 id="inputs-heading" class="visually-hidden">Race and Mileage Inputs</h2>
+          <form id="ricelo-form" action="." method="GET" novalidate aria-labelledby="inputs-heading">
+            <fieldset>
+              <legend>Recent Best Effort</legend>
+              <div class="seg-track" data-cols="6">
+                <label class="seg-item" for="dist-balke">
+                  <input type="radio" id="dist-balke" name="basisDistance" value="balke" class="visually-hidden">
+                  <span>Balke</span>
+                </label>
+                <label class="seg-item" for="dist-5k">
+                  <input type="radio" id="dist-5k" name="basisDistance" value="5" class="visually-hidden">
+                  <span>5K</span>
+                </label>
+                <label class="seg-item" for="dist-10k">
+                  <input type="radio" id="dist-10k" name="basisDistance" value="10" class="visually-hidden">
+                  <span>10K</span>
+                </label>
+                <label class="seg-item" for="dist-hm">
+                  <input type="radio" id="dist-hm" name="basisDistance" value="21.0975" class="visually-hidden" checked>
+                  <span>Half</span>
+                </label>
+                <label class="seg-item" for="dist-fm">
+                  <input type="radio" id="dist-fm" name="basisDistance" value="42.195" class="visually-hidden">
+                  <span>Full</span>
+                </label>
+                <label class="seg-item" for="dist-custom">
+                  <input type="radio" id="dist-custom" name="basisDistance" value="custom" class="visually-hidden">
+                  <span>Custom</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <div id="custom-distance-group" class="field-group" hidden>
+              <div class="label-row">
+                <label class="field-label" for="custom-distance-km">Recent Distance (km)</label>
+                <span id="custom-distance-hint" class="hint-inline">1.5 to 100 km</span>
+              </div>
+              <input
+                type="text"
+                id="custom-distance-km"
+                name="customDistanceKm"
+                value="15"
+                class="mono-input"
+                inputmode="decimal"
+                autocorrect="off"
+                autocapitalize="none"
+                spellcheck="false"
+                aria-describedby="custom-distance-hint"
+                data-error="custom-distance-error">
+              <div id="custom-distance-error" class="error-msg"></div>
+            </div>
+
+            <div id="balke-group" class="field-group" hidden>
+              <div class="label-row">
+                <label class="field-label" for="balke-distance">15-Min Balke Distance</label>
+                <fieldset class="inline-unit-fieldset">
+                  <legend class="visually-hidden">Balke distance unit</legend>
+                  <div class="mini-track">
+                    <label class="mini-item" for="balke-unit-m">
+                      <input type="radio" id="balke-unit-m" name="balkeUnit" value="m" class="visually-hidden" checked>
+                      <span>m</span>
+                    </label>
+                    <label class="mini-item" for="balke-unit-km">
+                      <input type="radio" id="balke-unit-km" name="balkeUnit" value="km" class="visually-hidden">
+                      <span>km</span>
+                    </label>
+                  </div>
+                </fieldset>
+              </div>
+              <span id="balke-hint" class="hint">Max distance covered in 15:00</span>
+              <input
+                type="text"
+                id="balke-distance"
+                name="balkeDistance"
+                value="3000"
+                class="mono-input"
+                inputmode="decimal"
+                autocorrect="off"
+                autocapitalize="none"
+                spellcheck="false"
+                enterkeyhint="done"
+                aria-describedby="balke-hint"
+                data-error="balke-error">
+              <div id="balke-error" class="error-msg"></div>
+            </div>
+
+            <fieldset id="time-fieldset" class="time-fieldset">
+              <legend>Finish Time</legend>
+              <div class="time-grid">
+                <div class="time-cell">
+                  <label class="time-sublabel" for="time-hh">hh</label>
+                  <input
+                    type="text"
+                    id="time-hh"
+                    name="time-hh"
+                    value="2"
+                    placeholder="0"
+                    maxlength="2"
+                    pattern="[0-9]{1,2}"
+                    class="mono-input"
+                    inputmode="numeric"
+                    autocorrect="off"
+                    autocapitalize="none"
+                    spellcheck="false"
+                    enterkeyhint="next"
+                    data-error="race-time-error">
+                </div>
+                <span class="time-sep" aria-hidden="true">:</span>
+                <div class="time-cell">
+                  <label class="time-sublabel" for="time-mm">mm</label>
+                  <input
+                    type="text"
+                    id="time-mm"
+                    name="time-mm"
+                    value="00"
+                    placeholder="00"
+                    maxlength="2"
+                    pattern="[0-5]?[0-9]"
+                    class="mono-input"
+                    inputmode="numeric"
+                    autocorrect="off"
+                    autocapitalize="none"
+                    spellcheck="false"
+                    enterkeyhint="next"
+                    data-error="race-time-error">
+                </div>
+                <span class="time-sep" aria-hidden="true">:</span>
+                <div class="time-cell">
+                  <label class="time-sublabel" for="time-ss">ss</label>
+                  <input
+                    type="text"
+                    id="time-ss"
+                    name="time-ss"
+                    value="00"
+                    placeholder="00"
+                    maxlength="2"
+                    pattern="[0-5]?[0-9]"
+                    class="mono-input"
+                    inputmode="numeric"
+                    autocorrect="off"
+                    autocapitalize="none"
+                    spellcheck="false"
+                    enterkeyhint="done"
+                    data-error="race-time-error">
+                </div>
+              </div>
+              <div id="race-time-error" class="error-msg"></div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Target Race</legend>
+              <div class="seg-track" data-cols="5">
+                <label class="seg-item" for="target-5k">
+                  <input type="radio" id="target-5k" name="targetDistance" value="5" class="visually-hidden">
+                  <span>5K</span>
+                </label>
+                <label class="seg-item" for="target-10k">
+                  <input type="radio" id="target-10k" name="targetDistance" value="10" class="visually-hidden">
+                  <span>10K</span>
+                </label>
+                <label class="seg-item" for="target-hm">
+                  <input type="radio" id="target-hm" name="targetDistance" value="21.0975" class="visually-hidden">
+                  <span>Half</span>
+                </label>
+                <label class="seg-item" for="target-fm">
+                  <input type="radio" id="target-fm" name="targetDistance" value="42.195" class="visually-hidden" checked>
+                  <span>Full</span>
+                </label>
+                <label class="seg-item" for="target-custom">
+                  <input type="radio" id="target-custom" name="targetDistance" value="custom" class="visually-hidden">
+                  <span>Custom</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <div id="target-custom-group" class="field-group" hidden>
+              <div class="label-row">
+                <label class="field-label" for="target-custom-km">Target Distance (km)</label>
+                <span id="target-custom-hint" class="hint-inline">1.5 to 100 km</span>
+              </div>
+              <input
+                type="text"
+                id="target-custom-km"
+                name="targetCustomKm"
+                value="30"
+                class="mono-input"
+                inputmode="decimal"
+                autocorrect="off"
+                autocapitalize="none"
+                spellcheck="false"
+                aria-describedby="target-custom-hint"
+                data-error="target-custom-error">
+              <div id="target-custom-error" class="error-msg"></div>
+            </div>
+
+            <div class="field-group is-last">
+              <div class="label-row">
+                <label class="field-label" for="weekly-volume">Weekly Mileage</label>
+                <fieldset class="inline-unit-fieldset">
+                  <legend class="visually-hidden">Weekly mileage unit</legend>
+                  <div class="mini-track">
+                    <label class="mini-item" for="unit-km">
+                      <input type="radio" id="unit-km" name="volumeUnit" value="km" class="visually-hidden" checked>
+                      <span>km/wk</span>
+                    </label>
+                    <label class="mini-item" for="unit-mi">
+                      <input type="radio" id="unit-mi" name="volumeUnit" value="mi" class="visually-hidden">
+                      <span>mi/wk</span>
+                    </label>
+                  </div>
+                </fieldset>
+              </div>
+              <span id="weekly-volume-hint" class="hint">8-week avg or pre-taper peak</span>
+              <div class="volume-controls">
+                <input
+                  type="range"
+                  id="weekly-volume-slider"
+                  name="weeklyVolumeSlider"
+                  min="10"
+                  max="160"
+                  step="1"
+                  value="50"
+                  aria-label="Weekly mileage slider">
+                <input
+                  type="text"
+                  id="weekly-volume"
+                  name="weeklyVolume"
+                  value="50"
+                  required
+                  class="mono-input"
+                  inputmode="decimal"
+                  autocorrect="off"
+                  autocapitalize="none"
+                  spellcheck="false"
+                  enterkeyhint="done"
+                  aria-describedby="weekly-volume-hint"
+                  data-error="weekly-volume-error">
+              </div>
+              <div id="weekly-volume-error" class="error-msg"></div>
+            </div>
+
+            <button type="submit" class="visually-hidden">Update prediction</button>
+          </form>
+        </section>
+
+        <section class="panel results-panel" aria-labelledby="results-heading">
+          <h2 id="results-heading" class="visually-hidden">Race Predictions</h2>
+
+          <div class="hero-block">
+            <div class="hero-top-row">
+              <span id="hero-target-label" class="hero-eyebrow">Predicted Full Marathon</span>
+              <div class="share-wrap">
+                <span id="copy-status" class="status-toast" role="status" aria-live="polite"></span>
+                <button type="button" id="share-link-btn" class="ghost-btn">Share</button>
+              </div>
+            </div>
+            <div id="hero-target-time" class="hero-clock">4:26:53</div>
+            <dl class="hero-ledger">
+              <div class="ledger-col">
+                <dt>Goal Pace</dt>
+                <dd id="hero-pace-value">6:20/km</dd>
+              </div>
+              <div class="ledger-col">
+                <dt id="hero-fade-label">vs. Half Pace</dt>
+                <dd id="hero-fade-value">+39s/km</dd>
+              </div>
+              <div class="ledger-col">
+                <dt>vs. Standard</dt>
+                <dd id="hero-delta-value">+16:41</dd>
+              </div>
+            </dl>
+            <p class="ledger-note">
+              <span id="hero-fade-note">How much slower per km than your Half pace.</span>
+              Standard is the formula most race calculators use (Riegel 1.06), which assumes elite-level mileage.
+            </p>
+          </div>
+
+          <p id="fm-base-note" class="base-note" hidden></p>
+
+          <div tabindex="0" role="region" aria-labelledby="predictions-caption" class="table-wrapper">
+            <table>
+              <caption id="predictions-caption" class="visually-hidden">Equivalent race times across distances</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Race</th>
+                  <th scope="col">Time</th>
+                  <th scope="col">Pace</th>
+                  <th scope="col">vs. Standard</th>
+                </tr>
+              </thead>
+              <tbody id="predictions-tbody"></tbody>
+            </table>
+          </div>
+
+          <details id="zones-panel" class="inline-details">
+            <summary class="inline-summary">Training Paces</summary>
+            <div class="inline-details-body">
+              <div tabindex="0" role="region" aria-labelledby="zones-caption" class="table-wrapper">
+                <table class="zones-table">
+                  <caption id="zones-caption" class="visually-hidden">Training pace zones</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Zone</th>
+                      <th scope="col">Pace</th>
+                      <th scope="col" class="col-use">Use</th>
+                    </tr>
+                  </thead>
+                  <tbody id="zones-tbody"></tbody>
+                </table>
+              </div>
+              <p id="zones-note" class="zones-note">
+                Marathon pace adjusts with your weekly mileage via Ricelo-Pace. Other zones use Jack Daniels' VDOT (62-70%, 88%, 97.5%, 105%) from your input effort.
+              </p>
+            </div>
+          </details>
+
+          <details id="curve-panel" class="inline-details">
+            <summary class="inline-summary">
+              <span id="curve-summary-title">Full Marathon time by weekly mileage</span>
+            </summary>
+            <div class="inline-details-body">
+              <figure class="curve-figure">
+                <figcaption class="curve-caption">
+                  <span>The dot is you. Dashed line: standard calculator.</span>
+                </figcaption>
+                <svg
+                  id="live-curve-svg"
+                  class="curve-svg"
+                  viewBox="0 0 560 200"
+                  role="img"
+                  aria-label="Predicted finish time across weekly mileage"></svg>
+              </figure>
+            </div>
+          </details>
+        </section>
+      </div>
+
+      <details id="pocket-formula" class="formula-details">
+        <summary class="formula-summary">Formula, Excel &amp; JS</summary>
+        <div class="formula-body">
+          <div class="formula-grid">
+            <div>
+              <h3>Any Race Pair</h3>
+              <div class="equation-box">
+                <strong>x</strong> = 1.06 + <strong>w</strong> &middot; max(0, 0.5413 &minus; 0.1002 &middot; ln(max(10, V)))<br>
+                <strong>T<sub>2</sub></strong> = T<sub>1</sub> &middot; (D<sub>2</sub> / D<sub>1</sub>)<sup>x</sup>
+              </div>
+              <p class="formula-note">
+                <strong>w</strong> = (&psi;(D<sub>2</sub>) &minus; &psi;(D<sub>1</sub>)) / ln(D<sub>2</sub> / D<sub>1</sub>), where
+                &psi;(D) = 0 for D &le; 5 km and 0.030215 &middot; ln(D / 5)<sup>3.8427</sup> up to 42.195 km (plus ln(D / 42.195) above marathon).
+              </p>
+              <ul id="weight-list" class="weight-list" aria-label="Interval weights w">
+                <li data-pair="21.0975:42.195"><span>HM &harr; FM</span> <code>0.624</code></li>
+                <li data-pair="10:42.195"><span>10K &harr; FM</span> <code>0.380</code></li>
+                <li data-pair="5:42.195"><span>5K &harr; FM</span> <code>0.260</code></li>
+                <li data-pair="10:21.0975"><span>10K &harr; HM</span> <code>0.154</code></li>
+                <li data-pair="5:21.0975"><span>5K &harr; HM</span> <code>0.085</code></li>
+                <li data-pair="5:10"><span>5K &harr; 10K</span> <code>0.011</code></li>
+              </ul>
+
+              <h3 id="shortcut-heading">Current Pair Shortcut (HM &rarr; FM, w = 0.624)</h3>
+              <div id="shortcut-equation" class="equation-box">
+                <strong>x</strong> = 1.06 + max(0, 0.3377 &minus; 0.0625 &middot; ln(max(10, V)))<br>
+                <strong>T<sub>FM</sub></strong> = T<sub>HM</sub> &middot; 2<sup>x</sup>
+              </div>
+            </div>
+
+            <div>
+              <h3>Excel / Sheets (Any Race Pair, up to FM)</h3>
+              <span class="hint">A2 = race time, B2 = from km, C2 = to km, D2 = km/week</span>
+              <pre id="excel-general-snippet">=IF(B2=C2, A2, A2 * (C2/B2)^(1.06 + (0.030215 * (LN(MAX(5, C2)/5)^3.8427 - LN(MAX(5, B2)/5)^3.8427) / LN(C2/B2)) * MAX(0, 0.5413 - 0.1002 * LN(MAX(10, D2)))))</pre>
+              <button type="button" class="ghost-btn is-bordered snippet-copy-btn" data-copy-target="excel-general-snippet">Copy General Excel</button>
+
+              <h3 id="excel-pair-heading">Excel / Sheets (HM &rarr; FM Shortcut)</h3>
+              <span id="excel-pair-hint" class="hint">A2 = Half time, B2 = km/week</span>
+              <pre id="excel-snippet">=A2 * 2^(1.06 + MAX(0, 0.3377 - 0.0625 * LN(MAX(10, B2))))</pre>
+              <button type="button" class="ghost-btn is-bordered snippet-copy-btn" data-copy-target="excel-snippet">Copy Shortcut Excel</button>
+
+              <h3>JavaScript (Any Distance, incl. Ultras)</h3>
+              <pre id="js-snippet">function riceloPace(t1Sec, d1Km, d2Km, vKmWk) {
+  const L = Math.log(42.195 / 5), g = 2.8427;
+  const psi = d =&gt; d &lt;= 5 ? 0 : d &lt; 42.195
+    ? (L / (g + 1)) * (Math.log(d / 5) / L) ** (g + 1)
+    : L / (g + 1) + Math.log(d / 42.195);
+  const w = d1Km === d2Km ? 0 : (psi(d2Km) - psi(d1Km)) / Math.log(d2Km / d1Km);
+  const x = 1.06 + w * Math.max(0, 0.5413 - 0.1002 * Math.log(Math.max(10, vKmWk)));
+  return t1Sec * (d2Km / d1Km) ** x;
+}</pre>
+              <button type="button" class="ghost-btn is-bordered" data-copy-target="js-snippet">Copy JS Function</button>
+            </div>
+          </div>
+        </div>
+      </details>
+    </main>
+
+    <footer class="site-footer">
+      Ricki Taufik &middot; MIT License &middot;
+      <a href="https://github.com/rictau/ricelo-pace">github.com/rictau/ricelo-pace</a>
+    </footer>
+  </div>
+  <script src="./calculator.js"></script>
+</body>
+</html>
