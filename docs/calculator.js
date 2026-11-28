@@ -858,6 +858,18 @@
     });
   });
 
+  const needsSliderProgressFallback =
+    typeof CSS !== 'undefined' && typeof CSS.supports === 'function' && !CSS.supports('accent-color', 'auto');
+
+  function syncSliderProgress() {
+    if (!needsSliderProgressFallback) return;
+    const min = Number(volumeSlider.min) || 0;
+    const max = Number(volumeSlider.max) || 100;
+    const val = Number(volumeSlider.value);
+    const pct = max > min ? Math.min(100, Math.max(0, ((val - min) / (max - min)) * 100)) : 0;
+    volumeSlider.style.setProperty('--progress', `${pct.toFixed(1)}%`);
+  }
+
   let currentActiveUnit = currentUnit();
   unitRadios.forEach((radio) => {
     radio.addEventListener('change', () => {
@@ -873,6 +885,7 @@
         volumeSlider.value = String(Math.min(Number(volumeSlider.max), Math.max(Number(volumeSlider.min), rounded)));
       }
       currentActiveUnit = nextUnit;
+      syncSliderProgress();
       setSingleFieldError(volumeInput, volumeError, '', false);
       updatePredictions();
     });
@@ -880,6 +893,7 @@
 
   volumeSlider.addEventListener('input', () => {
     volumeInput.value = volumeSlider.value;
+    syncSliderProgress();
     setSingleFieldError(volumeInput, volumeError, '', false);
     updatePredictions();
   });
@@ -890,6 +904,7 @@
     const v = Number(volumeInput.value.trim());
     if (Number.isFinite(v)) {
       volumeSlider.value = String(Math.min(Number(volumeSlider.max), Math.max(Number(volumeSlider.min), v)));
+      syncSliderProgress();
     }
     updatePredictions();
   });
@@ -1093,6 +1108,7 @@
     volumeSlider.value = qs.get('v');
   }
 
+  syncSliderProgress();
   syncBasisUI();
   updatePredictions();
 
